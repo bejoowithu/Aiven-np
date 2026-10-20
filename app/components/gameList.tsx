@@ -22,6 +22,7 @@ export default function GameList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     const savedUser = localStorage.getItem("user");
@@ -362,12 +363,12 @@ export default function GameList() {
       </section>
 
       {/* FOOTER */}
-      <footer 
-        suppressHydrationWarning 
-        className="border-t border-[#119DA4]/40 bg-[#040B14] px-5 py-6 text-center text-xs text-gray-500"
-      >
-        © {new Date().getFullYear()} LockedGames.
-      </footer>
+
+
+
+<footer className="border-t border-[#119DA4]/40 bg-[#040B14] px-5 py-6 text-center text-xs text-gray-500">
+  ©LockedGames.
+</footer>
 
       {/* PROFILE DROPDOWN OVERLAY */}
       {profileOpen && (
