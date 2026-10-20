@@ -302,7 +302,7 @@ export default function GameList() {
                       />
                     ) : (
                       <div className="flex h-full items-center justify-center text-5xl text-[#80DED9]/50">
-                        🎮
+                        
                       </div>
                     )}
 
@@ -362,7 +362,10 @@ export default function GameList() {
       </section>
 
       {/* FOOTER */}
-      <footer className="border-t border-[#119DA4]/40 bg-[#040B14] px-5 py-6 text-center text-xs text-gray-500">
+      <footer 
+        suppressHydrationWarning 
+        className="border-t border-[#119DA4]/40 bg-[#040B14] px-5 py-6 text-center text-xs text-gray-500"
+      >
         © {new Date().getFullYear()} LockedGames.
       </footer>
 
