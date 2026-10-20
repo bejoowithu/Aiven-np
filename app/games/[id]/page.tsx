@@ -1,7 +1,8 @@
+
 "use client";
 
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 
 interface Game {
   id: number;
@@ -12,11 +13,9 @@ interface Game {
   platform: string | null;
 }
 
-// 1. Terima params langsung dari props
-export default function GameDetailPage({ params }: { params: { id: string } }) {
+export default function GameDetailPage() {
+  const params = useParams<{ id: string }>();
   const router = useRouter();
-  
-  // 2. Ambil id dari props params
   const id = params.id;
 
   const [game, setGame] = useState<Game | null>(null);
@@ -24,18 +23,25 @@ export default function GameDetailPage({ params }: { params: { id: string } }) {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    const controller = new AbortController();
+
     async function fetchGame() {
       try {
         setLoading(true);
         setError("");
 
-        const apiUrl =
-          process.env.NEXT_PUBLIC_API_URL ??
-          "http://localhost:9669";
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+        if (!apiUrl) {
+          throw new Error("URL API belum dikonfigurasi.");
+        }
 
         const response = await fetch(
-          `${apiUrl}/api/games/${id}`,
-          { cache: "no-store" }
+          `${apiUrl.replace(/\/$/, "")}/api/games/${id}`,
+          {
+            cache: "no-store",
+            signal: controller.signal,
+          }
         );
 
         const result = await response.json();
@@ -48,19 +54,23 @@ export default function GameDetailPage({ params }: { params: { id: string } }) {
 
         setGame(result.data);
       } catch (err) {
+        if (err instanceof Error && err.name === "AbortError") {
+          return;
+        }
+
         setError(
-          err instanceof Error
-            ? err.message
-            : "Terjadi kesalahan"
+          err instanceof Error ? err.message : "Terjadi kesalahan"
         );
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     }
 
-    if (id) {
-      fetchGame();
-    }
+    if (id) fetchGame();
+
+    return () => controller.abort();
   }, [id]);
 
   const buttonStyle =
@@ -84,11 +94,9 @@ export default function GameDetailPage({ params }: { params: { id: string } }) {
           <h2 className="text-2xl text-[#80DED9]">
             Game tidak dapat ditampilkan
           </h2>
-
           <p className="mt-3 text-gray-400">
             {error || "Game tidak ditemukan."}
           </p>
-
           <button
             className={`${buttonStyle} mt-6`}
             onClick={() => router.push("/games")}
@@ -133,10 +141,7 @@ export default function GameDetailPage({ params }: { params: { id: string } }) {
             </h1>
 
             <div className="mt-8 border-t border-[#3066BE]/20 pt-6">
-              <h2 className="text-lg text-[#80DED9]">
-                Deskripsi
-              </h2>
-
+              <h2 className="text-lg text-[#80DED9]">Deskripsi</h2>
               <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-7 text-gray-300">
                 {game.deskripsi || "Belum ada deskripsi game."}
               </p>
