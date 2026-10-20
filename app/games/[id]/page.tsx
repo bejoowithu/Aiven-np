@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 interface Game {
   id: number;
@@ -12,10 +12,12 @@ interface Game {
   platform: string | null;
 }
 
-export default function GameDetailPage() {
-  const params = useParams();
+// 1. Terima params langsung dari props
+export default function GameDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter();
-  const id = params.id as string;
+  
+  // 2. Ambil id dari props params
+  const id = params.id;
 
   const [game, setGame] = useState<Game | null>(null);
   const [loading, setLoading] = useState(true);
