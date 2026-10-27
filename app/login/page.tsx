@@ -5,8 +5,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:9669";
+const API_URL = "http://localhost:9669";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -23,7 +22,9 @@ export default function LoginPage() {
     try {
       const response = await fetch(`${API_URL}/api/auth/login`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ username, password }),
       });
 
@@ -129,12 +130,11 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full rounded-lg bg-[#3066BE] py-3 font-semibold text-white transition hover:bg-#119DA4] disabled:opacity-60"
+                className="w-full rounded-lg bg-[#3066BE] py-3 font-semibold text-white transition hover:bg-[#119DA4] disabled:opacity-60"
               >
                 {loading ? "Memproses..." : "Sign In"}
               </button>
             </form>
-            
           </div>
         </section>
       </div>

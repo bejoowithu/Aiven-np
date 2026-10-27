@@ -13,6 +13,15 @@ interface Game {
   platform: string | null;
 }
 
+interface ApiResponse {
+  message?: string;
+  data?: Game;
+}
+
+const API_URL = (
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:9669"
+).replace(/\/+$/, "");
+
 export default function GameDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
@@ -30,26 +39,25 @@ export default function GameDetailPage() {
         setLoading(true);
         setError("");
 
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        const response = await fetch(`${API_URL}/api/games/${id}`, {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+          },
+          cache: "no-store",
+          signal: controller.signal,
+        });
 
-        if (!apiUrl) {
-          throw new Error("URL API belum dikonfigurasi.");
-        }
-
-        const response = await fetch(
-          `${apiUrl.replace(/\/$/, "")}/api/games/${id}`,
-          {
-            cache: "no-store",
-            signal: controller.signal,
-          }
-        );
-
-        const result = await response.json();
+        const result: ApiResponse = await response.json();
 
         if (!response.ok) {
           throw new Error(
-            result.message || "Gagal mengambil detail game"
+            result.message || "Gagal mengambil detail game."
           );
+        }
+
+        if (!result.data) {
+          throw new Error("Data game tidak ditemukan.");
         }
 
         setGame(result.data);
@@ -59,7 +67,9 @@ export default function GameDetailPage() {
         }
 
         setError(
-          err instanceof Error ? err.message : "Terjadi kesalahan"
+          err instanceof Error
+            ? err.message
+            : "Terjadi kesalahan saat mengambil data game."
         );
       } finally {
         if (!controller.signal.aborted) {
@@ -68,7 +78,9 @@ export default function GameDetailPage() {
       }
     }
 
-    if (id) fetchGame();
+    if (id) {
+      fetchGame();
+    }
 
     return () => controller.abort();
   }, [id]);
@@ -94,10 +106,13 @@ export default function GameDetailPage() {
           <h2 className="text-2xl text-[#80DED9]">
             Game tidak dapat ditampilkan
           </h2>
+
           <p className="mt-3 text-gray-400">
             {error || "Game tidak ditemukan."}
           </p>
+
           <button
+            type="button"
             className={`${buttonStyle} mt-6`}
             onClick={() => router.push("/games")}
           >
@@ -112,6 +127,7 @@ export default function GameDetailPage() {
     <main className="min-h-screen bg-[#0B111B] px-5 py-10 text-white sm:py-14">
       <div className="mx-auto max-w-5xl">
         <button
+          type="button"
           className={buttonStyle}
           onClick={() => router.push("/games")}
         >
@@ -142,19 +158,22 @@ export default function GameDetailPage() {
 
             <div className="mt-8 border-t border-[#3066BE]/20 pt-6">
               <h2 className="text-lg text-[#80DED9]">Deskripsi</h2>
+
               <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-7 text-gray-300">
                 {game.deskripsi || "Belum ada deskripsi game."}
               </p>
             </div>
 
-            <a
-              href={game.link_download}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-8 inline-flex items-center justify-center rounded-xl bg-[#3066BE] px-6 py-3.5 text-sm text-white transition hover:bg-[#6D9DC5] hover:text-[#0B111B]"
-            >
-              Download Game
-            </a>
+            {game.link_download && (
+              <a
+                href={game.link_download}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-8 inline-flex items-center justify-center rounded-xl bg-[#3066BE] px-6 py-3.5 text-sm text-white transition hover:bg-[#6D9DC5] hover:text-[#0B111B]"
+              >
+                Download Game
+              </a>
+            )}
           </div>
         </article>
       </div>

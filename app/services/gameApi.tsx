@@ -1,6 +1,5 @@
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:9669";
+const API_URL = "http://localhost:9669";
 
 export interface Game {
   id: number;
